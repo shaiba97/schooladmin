@@ -470,3 +470,80 @@ export type ApiInvigilationDuty = {
   teacher?: ApiTeacher | null;
   hall?: ApiHall | null;
 };
+
+/** The school administrator's own workspace: person, school, plan, positions. */
+export interface ApiSchoolAdminOverview {
+  admin: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string | null;
+    phone: string | null;
+    avatarUrl: string | null;
+    staffNumber: string | null;
+    status: string;
+    lastLoginAt: string | null;
+    role: "SCHOOL_ADMIN";
+  };
+  tenant: {
+    id: string;
+    name: string;
+    nameAr: string | null;
+    email: string | null;
+    phone: string | null;
+    logoUrl: string | null;
+    websiteUrl: string | null;
+    countryCode: string | null;
+    currencyCode: string;
+    timezone: string;
+    weekendDays: string[];
+    status: string;
+    createdAt: string;
+  };
+  subscription: {
+    id: string;
+    tier: string;
+    tierName: string;
+    tierLabel: string | null;
+    status: string;
+    subscriptionStatus:
+      | "ACTIVE"
+      | "EXPIRING_SOON"
+      | "EXPIRED"
+      | "LOCKED"
+      | "NO_SUBSCRIPTION";
+    startedAt: string;
+    expiresAt: string | null;
+    daysRemaining: number | null;
+    durationDays: number;
+    studentCount: number;
+    monthlyPrice: number;
+    currency: string;
+    portals: string[];
+  } | null;
+  portals: Array<{ portal: string; unlocked: boolean }>;
+  allowedPositions: Array<{ position: string; label: string }>;
+  positions: ApiSchoolPosition[];
+}
+
+export interface ApiSchoolPosition {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  portal: string | null;
+  isSystemRole: boolean;
+  members: number;
+}
+
+export interface ApiTenantUpdateInput {
+  name?: string;
+  nameAr?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  logoUrl?: string | null;
+  websiteUrl?: string | null;
+  countryCode?: string | null;
+  currencyCode?: string;
+  timezone?: string;
+}

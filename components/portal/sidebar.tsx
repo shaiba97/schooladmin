@@ -79,6 +79,13 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    title: "My School",
+    roles: ["ADMIN", "SYSTEM_ADMIN"],
+    items: [
+      { href: "/admin/profile", label: "Profile & Subscription", icon: UserCog },
+    ],
+  },
+  {
     title: "Administration & System",
     roles: ["ADMIN", "SYSTEM_ADMIN"],
     items: [
