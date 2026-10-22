@@ -26,6 +26,26 @@ const STATUS_VARIANT = {
   NO_SUBSCRIPTION: "outline",
 } as const;
 
+/** The years a school may ask a term for. A year is the shortest term. */
+const TERM_YEARS = [1, 2, 3, 4, 5] as const;
+
+function money(value: number, currency: string) {
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function moneyWhole(value: number, currency: string) {
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  });
+}
+
 function formatDate(value: string | null) {
   if (!value) return "—";
   return new Date(value).toISOString().slice(0, 10);
@@ -34,6 +54,7 @@ function formatDate(value: string | null) {
 export function SubscriptionCard({
   subscription,
   portals,
+  upgrades,
 }: {
   subscription: {
     tier: string;
@@ -45,17 +66,33 @@ export function SubscriptionCard({
     daysRemaining: number | null;
     durationDays: number;
     studentCount: number;
+    yearlyPrice: number;
     monthlyPrice: number;
     currency: string;
     portals: string[];
   } | null;
   portals: Array<{ portal: string; unlocked: boolean }>;
+  upgrades: Array<{
+    id: string;
+    code: string;
+    name: string;
+    tier: string;
+    yearlyPrice: number;
+    monthlyPrice: number;
+    currency: string;
+    durationDays: number;
+    portals: string[];
+  }>;
 }) {
   const [asking, setAsking] = React.useState(false);
   const [note, setNote] = React.useState("");
   const [sending, setSending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [sent, setSent] = React.useState(false);
+  // The tier the school asks for, a term of whole years, and what the term
+  // would cost the school.
+  const [requestedPlanId, setRequestedPlanId] = React.useState("");
+  const [years, setYears] = React.useState(1);
 
   if (!subscription) {
     return (
@@ -84,7 +121,7 @@ export function SubscriptionCard({
     setSending(true);
     setError(null);
     try {
-      await requestTierChange({ planId: "", note });
+      await requestTierChange({ planId: requestedPlanId, years, note });
       setSent(true);
       setAsking(false);
     } catch (err) {
@@ -115,11 +152,10 @@ export function SubscriptionCard({
             <div className="flex flex-col gap-1">
               <dt className="text-xs text-muted-foreground">Monthly amount</dt>
               <dd className="font-mono text-lg">
-                {subscription.monthlyPrice.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: subscription.currency,
-                  maximumFractionDigits: 0,
-                })}
+                {money(subscription.monthlyPrice, subscription.currency)}
+              </dd>
+              <dd className="text-xs text-muted-foreground">
+                {moneyWhole(subscription.yearlyPrice, subscription.currency)} a year
               </dd>
             </div>
             <div className="flex flex-col gap-1">
@@ -169,6 +205,11 @@ export function SubscriptionCard({
               variant="outline"
               onClick={() => {
                 setSent(false);
+                setRequestedPlanId(
+                  upgrades.find((entry) => entry.code !== subscription.tier)?.id ??
+                    "",
+                );
+                setYears(1);
                 setAsking(true);
               }}
             >
@@ -211,48 +252,158 @@ export function SubscriptionCard({
       </Card>
 
       {asking ? (
-        <Dialog open onOpenChange={(open) => (open ? undefined : setAsking(false))}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Request a tier change</DialogTitle>
-              <DialogDescription>
-                Your plan is set by the platform. Send what you need and platform
-                support will arrange the change.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="tier-note">What do you need?</Label>
-              <Textarea
-                id="tier-note"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="We added a transport fleet and need that portal."
-                rows={3}
-              />
-            </div>
-
-            {error ? (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            ) : null}
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAsking(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="button" disabled={sending} onClick={() => void send()}>
-                {sending ? "Sending…" : "Send request"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <RequestTierDialog
+          currentTier={subscription.tier}
+          upgrades={upgrades}
+          years={years}
+          onYearsChange={setYears}
+          planId={requestedPlanId}
+          onPlanChange={(id) => {
+            setRequestedPlanId(id);
+            setSent(false);
+          }}
+          note={note}
+          onNoteChange={setNote}
+          onClose={() => setAsking(false)}
+          onSend={() => void send()}
+          sending={sending}
+          error={error}
+        />
       ) : null}
     </div>
+  );
+}
+
+function RequestTierDialog({
+  currentTier,
+  upgrades,
+  years,
+  onYearsChange,
+  planId,
+  onPlanChange,
+  note,
+  onNoteChange,
+  onClose,
+  onSend,
+  sending,
+  error,
+}: {
+  currentTier: string;
+  upgrades: Array<{
+    id: string;
+    code: string;
+    name: string;
+    tier: string;
+    yearlyPrice: number;
+    monthlyPrice: number;
+    currency: string;
+    portals: string[];
+  }>;
+  years: number;
+  onYearsChange: (years: number) => void;
+  planId: string;
+  onPlanChange: (planId: string) => void;
+  note: string;
+  onNoteChange: (note: string) => void;
+  onClose: () => void;
+  onSend: () => void;
+  sending: boolean;
+  error: string | null;
+}) {
+  const choices = upgrades.filter((entry) => entry.code !== currentTier);
+  const chosen = choices.find((entry) => entry.id === planId);
+  const due = chosen ? chosen.yearlyPrice * years : 0;
+
+  return (
+    <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Request a tier change</DialogTitle>
+          <DialogDescription>
+            Your plan is set by the platform. Pick the tier you need and
+            platform support will arrange the change.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tier-target">Tier</Label>
+          <select
+            id="tier-target"
+            className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed dark:bg-input/30"
+            value={planId}
+            onChange={(event) => onPlanChange(event.target.value)}
+          >
+            <option value="" disabled>
+              Choose a tier
+            </option>
+            {choices.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.name} ({entry.code})
+              </option>
+            ))}
+          </select>
+          {chosen ? (
+            <p className="text-xs text-muted-foreground">
+              {money(chosen.yearlyPrice, chosen.currency)} a year,{" "}
+              {money(chosen.monthlyPrice, chosen.currency)} a month ·{" "}
+              {chosen.portals.length} portals
+            </p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tier-years">Term</Label>
+          <div className="flex gap-1" role="group" aria-label="Term in years">
+            {TERM_YEARS.map((option) => (
+              <Button
+                key={option}
+                type="button"
+                size="sm"
+                variant={years === option ? "default" : "outline"}
+                onClick={() => onYearsChange(option)}
+                aria-pressed={years === option}
+              >
+                {option} {option === 1 ? "year" : "years"}
+              </Button>
+            ))}
+          </div>
+          {chosen && due > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {moneyWhole(due, chosen.currency)} due for the term.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tier-note">Anything else?</Label>
+          <Textarea
+            id="tier-note"
+            value={note}
+            onChange={(event) => onNoteChange(event.target.value)}
+            placeholder="We added a transport fleet and need that portal."
+            rows={3}
+          />
+        </div>
+
+        {error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
+
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={() => onSend()}
+            disabled={sending || !planId}
+          >
+            {sending ? "Sending…" : "Send request"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

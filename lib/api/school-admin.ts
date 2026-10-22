@@ -50,9 +50,22 @@ export function deleteSchoolPosition(id: string) {
   );
 }
 
-export function requestTierChange(input: { planId: string; note?: string }) {
-  return adminApiFetch<{ requested: boolean; plan: { id: string; code: string; name: string } }>(
-    "/school-admin/subscription/tier-request",
-    { method: "POST", body: JSON.stringify(input) },
-  );
+export function requestTierChange(input: {
+  planId: string;
+  years?: number;
+  note?: string;
+}) {
+  return adminApiFetch<{
+    requested: boolean;
+    plan: { id: string; code: string; name: string };
+    years: number;
+    yearlyPrice: number;
+    monthlyPrice: number;
+    termTotal: number;
+    currency: string;
+    requestedAt: string;
+  }>("/school-admin/subscription/tier-request", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }

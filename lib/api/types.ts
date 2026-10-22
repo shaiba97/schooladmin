@@ -517,6 +517,9 @@ export interface ApiSchoolAdminOverview {
     daysRemaining: number | null;
     durationDays: number;
     studentCount: number;
+    /** The yearly rate the school pays. */
+    yearlyPrice: number;
+    /** The monthly equivalent of the yearly rate. */
     monthlyPrice: number;
     currency: string;
     portals: string[];
@@ -524,6 +527,18 @@ export interface ApiSchoolAdminOverview {
   portals: Array<{ portal: string; unlocked: boolean }>;
   allowedPositions: Array<{ position: string; label: string }>;
   positions: ApiSchoolPosition[];
+  /** The tiers a school could ask to move to. */
+  upgrades: Array<{
+    id: string;
+    code: string;
+    name: string;
+    tier: string;
+    yearlyPrice: number;
+    monthlyPrice: number;
+    currency: string;
+    durationDays: number;
+    portals: string[];
+  }>;
 }
 
 export interface ApiSchoolPosition {

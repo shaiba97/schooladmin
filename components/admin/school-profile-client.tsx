@@ -126,6 +126,7 @@ export function SchoolProfileClient() {
           <SubscriptionCard
             subscription={overview.subscription}
             portals={overview.portals}
+            upgrades={overview.upgrades}
           />
         </TabsContent>
 
