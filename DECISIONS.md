@@ -212,8 +212,7 @@ New canonical staff position for the transport portal, mirroring the FINANCIAL_A
 - **A school that has no licence sees a plain explanation** rather than an empty card, and a school whose term is ending is told so before the lock rather than after it.
 - The admin portal's sidebar gains a "My School" section so the workspace is reachable without knowing the path.
 
-
 ## 2026-10-22 - Ask for a tier with a term of whole years
-- **The request dialog is real now:** it sends a concrete tier (\planId\ picked from \overview.upgrades\, which lists the active tiers the server fetched) plus \years\ (1-5 buttons) and a free-note. Live preview: the tier's yearly rate and monthly equivalent while picking, and "\ for the term" while choosing the term.
-- **The card shows the money the Vercel way:** the monthly equivalent is the headline, "\ a year" sits beneath it. The API response type (\subscription.yearlyPrice/monthlyPrice\, \upgrades[]\) and \equestTierChange\ (\years?/note?\, typed return with \	ermTotal\) were extended to match.
-- Verified in \dmin/\: tsc clean, eslint clean (remaining 2 warnings pre-existing, unrelated file), production build clean. Committed as a11c73a on \eature/platform-plans-locking\ (branch created in \dmin/\ - it had been on \master\).
+- **The request dialog is real now:** it sends a concrete tier (`planId` picked from `overview.upgrades`, the active tiers the server fetched) plus `years` (1-5 buttons) and a free-note. Live preview: the tier's yearly rate and monthly equivalent while picking, and "$due for the term" while choosing the term.
+- **The card shows the money the Vercel way:** the monthly equivalent is the headline, "$X a year" sits beneath it. API types (`subscription.yearlyPrice/monthlyPrice`, `upgrades[]`) and `requestTierChange` (`years?/note?`, typed return with `termTotal`) were extended to match.
+- Verified in `admin/`: tsc clean, eslint clean (2 remaining warnings pre-existing in an unrelated file), production build clean. Committed a11c73a on `feature/platform-plans-locking` (branch created in `admin/` - it had been on `master`).
