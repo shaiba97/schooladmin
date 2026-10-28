@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/portal/placeholder-page";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <PlaceholderPage title="Expenses" />;
+  redirect("/school/admin/finance/expenses");
 }

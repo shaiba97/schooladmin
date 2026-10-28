@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { ADMIN_NO_AUTH_BYPASS } from "./lib/auth-flag";
 import { ADMIN_TOKEN_COOKIE } from "./lib/api/session";
 
-const PORTAL_PATHS = ["/dashboard", "/financial", "/people", "/system"];
+const PORTAL_PATHS = ["/dashboard", "/financial", "/people", "/system", "/admin", "/academic"];
 
 /**
  * Portal guard (Next 16 `proxy` convention): cookie presence only. Token
@@ -35,10 +35,14 @@ export const config = {
     "/financial",
     "/people",
     "/system",
+    "/admin",
+    "/academic",
     "/dashboard/:path*",
     "/financial/:path*",
     "/people/:path*",
     "/system/:path*",
+    "/admin/:path*",
+    "/academic/:path*",
     "/login",
   ],
 };

@@ -14,8 +14,12 @@ import { Button } from "@/components/ui/button";
  * refuses every request with a flat TENANT_LOCKED body; this component
  * picks that up and explains what happened instead of leaving the user
  * with a broken page.
+ *
+ * Props stay optional: the portals mount it with none and get the sign-out
+ * button; the login screen passes `onRetry` because there is nothing to
+ * sign out of — the user instead retries with a different identifier.
  */
-export function TenantLockedNotice() {
+export function TenantLockedNotice({ onRetry }: { onRetry?: () => void }) {
   const [notice, setNotice] = React.useState<TenantLockNotice | null>(
     currentTenantLock(),
   );
@@ -81,9 +85,15 @@ export function TenantLockedNotice() {
         </dl>
 
         <div className="flex justify-end gap-2 border-t pt-3">
-          <Button type="button" variant="outline" onClick={() => void signOut()}>
-            Sign out
-          </Button>
+          {onRetry ? (
+            <Button type="button" variant="outline" onClick={onRetry}>
+              Try another account
+            </Button>
+          ) : (
+            <Button type="button" variant="outline" onClick={() => void signOut()}>
+              Sign out
+            </Button>
+          )}
         </div>
       </div>
     </div>

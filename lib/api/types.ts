@@ -22,6 +22,7 @@ export type ApiStudent = {
   updatedAt: string;
   enrollments?: ApiEnrollment[];
   documents?: ApiStudentDocument[];
+  guardians?: ApiStudentGuardianLink[];
 };
 
 export type ApiEnrollment = {
@@ -64,9 +65,22 @@ export type ApiStudentResult = {
   student?: { id: string; roleNumber?: string | null; firstName: string; lastName?: string | null } | null;
   examSubject?: {
     maxMarks?: number | string | null;
-    exam?: { id: string; name: string; status: string; publishedAt?: string | null } | null;
+    passingMarks?: number | string | null;
+    exam?: {
+      id: string;
+      name: string;
+      status: string;
+      publishedAt?: string | null;
+      academicYear?: { id: string; name: string } | null;
+    } | null;
     classSubject?: {
-      schoolClass?: { id: string; className: string } | null;
+      schoolClass?: {
+        id: string;
+        className: string;
+        educationLevel?: string | null;
+        grade?: number | null;
+        track?: string | null;
+      } | null;
       subject?: { id: string; name: string } | null;
     } | null;
   } | null;
@@ -119,13 +133,28 @@ export const ATTENDANCE_STATUSES: Array<{ id: AttendanceStatusId; label: string 
   { id: "EXCUSED", label: "Excused" },
 ];
 
-export type StaffAttendanceStatusId = "PRESENT" | "ABSENT" | "LEAVE";
+export type StaffMemberAttendanceStatusId = "PRESENT" | "LATE" | "ABSENT" | "PERMITTED" | "LEAVE";
 
-export const STAFF_ATTENDANCE_STATUSES: Array<{ id: StaffAttendanceStatusId; label: string }> = [
+export const STAFF_MEMBER_ATTENDANCE_STATUSES: Array<{
+  id: StaffMemberAttendanceStatusId;
+  label: string;
+}> = [
   { id: "PRESENT", label: "Present" },
+  { id: "LATE", label: "Late" },
   { id: "ABSENT", label: "Absent" },
-  { id: "LEAVE", label: "Leave" },
+  { id: "PERMITTED", label: "Excused" },
+  { id: "LEAVE", label: "On leave" },
 ];
+
+export type AttendanceUpsertPayload = {
+  date: string;
+  entries: Array<{
+    refId: string;
+    status: StaffMemberAttendanceStatusId;
+    leftAt?: string;
+    remarks?: string;
+  }>;
+};
 
 export type ApiAttendanceStudent = {
   id: string;
@@ -272,7 +301,13 @@ export type ApiTeacher = {
   classSubjects?: Array<{
     id: string;
     subject?: { id: string; name: string } | null;
-    schoolClass?: { id: string; className: string } | null;
+  schoolClass?: {
+    id: string;
+    className: string;
+    educationLevel?: string | null;
+    grade?: number | null;
+    track?: string | null;
+  } | null;
   }>;
   classTeacherFor?: Array<{ id: string; className: string }>;
 };
@@ -302,8 +337,8 @@ export type ApiAcademicYear = {
   id: string;
   tenantId?: string;
   name: string;
-  startsOn: string;
-  endsOn: string;
+  startsOn?: string | null;
+  endsOn?: string | null;
   isCurrent: boolean;
   createdAt?: string;
   _count?: { terms: number };
@@ -331,7 +366,13 @@ export type ApiClassSubject = {
   classId: string;
   subjectId: string;
   teacherId?: string | null;
-  schoolClass?: { id: string; className: string } | null;
+  schoolClass?: {
+    id: string;
+    className: string;
+    educationLevel?: string | null;
+    grade?: number | null;
+    track?: string | null;
+  } | null;
   subject?: ApiSubject;
   teacher?: { id: string; user?: ApiUserSummary | null } | null;
 };
@@ -361,9 +402,115 @@ export type ApiExamSubject = {
   passingMarks?: number | string | null;
   weight?: number | string | null;
   gradingScaleId?: string | null;
+  sampleObjectKey?: string | null;
   classSubject?: ApiClassSubject | null;
   gradingScale?: ApiGradingScale | null;
   results?: ApiStudentResult[];
+};
+
+export type CreateExamSubjectPayload = {
+  classSubjectId: string;
+  examDate?: string;
+  maxMarks: number;
+  passingMarks?: number;
+  weight?: number;
+  gradingScaleId?: string;
+  sample?: { objectKey: string; originalName: string; size: number };
+};
+
+export type CreateExamPayload = {
+  academicYearId: string;
+  termId?: string;
+  examTypeId?: string;
+  name: string;
+  startsOn?: string;
+  endsOn?: string;
+  sample?: { objectKey: string; originalName: string; size: number } | null;
+  subjects?: CreateExamSubjectPayload[];
+  /** One Exam row per class sharing an examGroupId. Omit for a standalone exam. */
+  classIds?: string[];
+};
+
+export type CreateRoomAssignmentPayload = {
+  hallId: string;
+  invigilatorIds?: string[];
+  /** Omit to auto-fill from the exam classes (alphabetical seating). */
+  studentIds?: string[];
+};
+
+export type CreateHallPayload = {
+  name: string;
+  capacity: number;
+  type?: "PHYSICAL" | "VIRTUAL";
+};
+
+export type ApiExamAnalyticsSubject = {
+  examSubjectId: string;
+  className: string;
+  subjectName: string;
+  maxMarks: number;
+  entered: number;
+  average: number | null;
+  highest: number | null;
+  lowest: number | null;
+  passed: number | null;
+  passRate: number | null;
+};
+
+export type ApiExamAnalytics = {
+  examId: string;
+  subjects: ApiExamAnalyticsSubject[];
+  overall: { entered: number; average: number | null; passRate: number | null };
+};
+
+/**
+ * One row of the tenant-wide results board (`GET /students/results/board`).
+ * This is the read model the Results Wizard builds its per-class matrix from.
+ */
+export type ApiTenantResult = {
+  id: string;
+  studentId: string;
+  examSubjectId: string;
+  marks?: number | string | null;
+  grade?: string | null;
+  remarks?: string | null;
+  status: string;
+  kind: string;
+  createdAt: string;
+  student: {
+    id: string;
+    roleNumber: string;
+    firstName: string;
+    lastName?: string | null;
+    educationLevel?: string | null;
+    grade?: number | null;
+    status?: string | null;
+  };
+  examSubject: {
+    id?: string;
+    maxMarks?: number | string | null;
+    passingMarks?: number | string | null;
+    exam?: {
+      id: string;
+      name: string;
+      status: string;
+      publishedAt?: string | null;
+      examTypeId?: string | null;
+      startsOn?: string | null;
+      endsOn?: string | null;
+      academicYear?: { id: string; name: string } | null;
+    } | null;
+    classSubject?: {
+      schoolClass?: {
+        id: string;
+        className: string;
+        educationLevel?: string | null;
+        grade?: number | null;
+        track?: string | null;
+      } | null;
+      subject?: { id: string; name: string } | null;
+    } | null;
+  } | null;
 };
 
 export type ApiExam = {

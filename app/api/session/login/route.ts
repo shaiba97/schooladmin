@@ -61,6 +61,12 @@ export async function POST(request: Request) {
   }
   if (!upstream.ok) {
     const data = await upstream.json().catch(() => undefined);
+    // A locked-school refusal is a flat body (code TENANT_LOCKED) the login
+    // screen reads lock facts from; forward it whole instead of just the
+    // message like other errors.
+    if (data && typeof data === "object" && (data as { code?: unknown }).code === "TENANT_LOCKED") {
+      return NextResponse.json(data, { status: upstream.status });
+    }
     const message =
       typeof data === "object" && data && "message" in data
         ? String((data as { message: unknown }).message)

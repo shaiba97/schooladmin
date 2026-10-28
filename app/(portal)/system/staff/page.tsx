@@ -43,6 +43,8 @@ import {
   type StaffMember,
   type StaffPositionKey,
 } from "@/components/admin/add-staff-modal";
+import { schoolAdminOverview } from "@/lib/api/school-admin";
+import type { ApiSchoolAdminOverview } from "@/lib/api/types";
 import { Search, Plus, MoreVertical, Pencil, Trash2, ShieldCheck, ShieldOff, Eye, KeyRound } from "lucide-react";
 
 const POSITION_KEYS = Object.keys(POSITION_LABEL) as StaffPositionKey[];
@@ -63,6 +65,17 @@ export default function StaffPage() {
   const [newPassword, setNewPassword] = React.useState("");
   const [showResetPassword, setShowResetPassword] = React.useState(false);
   const [resetting, setResetting] = React.useState(false);
+
+  // Tier-gated position list for the add/edit modal. A failed overview only
+  // degrades to "show all" — the server still refuses off-tier positions.
+  const [allowedPositions, setAllowedPositions] = React.useState<ApiSchoolAdminOverview["allowedPositions"] | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    schoolAdminOverview()
+      .then((overview) => { if (!cancelled) setAllowedPositions(overview.allowedPositions ?? null); })
+      .catch(() => { if (!cancelled) setAllowedPositions(null); });
+    return () => { cancelled = true; };
+  }, []);
 
   async function load() {
     try {
@@ -288,6 +301,7 @@ export default function StaffPage() {
         onOpenChange={setDialogOpen}
         onSaved={() => void load()}
         initial={editing}
+        allowedPositions={allowedPositions ?? undefined}
       />
 
       <Dialog open={!!viewing} onOpenChange={() => setViewing(null)}>

@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TenantLockedNotice } from "@/components/portal/tenant-locked-notice";
+import { clearTenantLock, notifyTenantLock, tenantLockFromBody, type TenantLockNotice } from "@/lib/tenant-lock";
 
 type TenantOption = { id: string; name: string };
 
 type LoginResult =
   | { ok: true; roles: string[] }
-  | { ok: false; message: string; tenants?: TenantOption[] };
+  | { ok: false; message: string; tenants?: TenantOption[]; lock?: TenantLockNotice };
 
 async function postLogin(identifier: string, password: string, tenantId?: string): Promise<LoginResult> {
   const response = await fetch("/api/session/login", {
@@ -50,7 +52,8 @@ async function postLogin(identifier: string, password: string, tenantId?: string
     Array.isArray((data as { tenants: unknown }).tenants)
       ? ((data as { tenants: TenantOption[] }).tenants ?? [])
       : undefined;
-  return { ok: false, message, tenants };
+  const lock = tenantLockFromBody(data) ?? undefined;
+  return { ok: false, message, tenants, lock };
 }
 
 export function LoginClient() {
@@ -72,10 +75,18 @@ export function LoginClient() {
         setError("");
         return;
       }
+      if (!result.ok && result.lock) {
+        // The backend refused this account's school (TENANT_LOCKED). Show
+        // the same locked-out explainer the portals show; "Try another
+        // account" clears it so retrying with a different identifier works.
+        notifyTenantLock(result.lock);
+        return;
+      }
       if (!result.ok) {
         setError(result.message);
         return;
       }
+      clearTenantLock();
       router.push("/dashboard");
       router.refresh();
     } catch {
@@ -96,6 +107,7 @@ export function LoginClient() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center p-4">
+      <TenantLockedNotice onRetry={() => clearTenantLock()} />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">

@@ -213,7 +213,7 @@ export function SubscriptionCard({
                 setAsking(true);
               }}
             >
-              Request tier upgrade
+              Request tier change
             </Button>
           </div>
         </CardContent>

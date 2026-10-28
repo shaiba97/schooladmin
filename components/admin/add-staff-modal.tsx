@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { ApiSchoolAdminOverview } from "@/lib/api/types";
 
 export type StaffPositionKey =
   | "FINANCIAL_AFFAIRS"
@@ -73,9 +74,22 @@ interface AddStaffModalProps {
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
   initial?: StaffMember | null;
+  /**
+   * Positions the school's active plan tier grants, from
+   * GET /school-admin/overview. The server rejects disallowed positions with
+   * an explicit 403 either way; when the overview could not be loaded this is left
+   * null and the select shows every position (server remains the backstop).
+   */
+  allowedPositions?: ApiSchoolAdminOverview["allowedPositions"] | null;
 }
 
-export function AddStaffModal({ open, onOpenChange, onSaved, initial }: AddStaffModalProps) {
+export function AddStaffModal({
+  open,
+  onOpenChange,
+  onSaved,
+  initial,
+  allowedPositions = null,
+}: AddStaffModalProps) {
   const [fullName, setFullName] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [position, setPosition] = React.useState<StaffPositionKey>("RECEPTIONIST");
@@ -106,6 +120,37 @@ export function AddStaffModal({ open, onOpenChange, onSaved, initial }: AddStaff
     setPassword(""); setShowPassword(false);
     setSaving(false); setError(null); setCreatedId("");
   }, [open, initial]);
+
+  /**
+   * Positions the select offers under the school's plan tier. The server
+   * rejects disallowed positions with a 403 on POST/PATCH /staff either way;
+   * a null/failed overview means every position is shown (backstop).
+   *
+   * CUSTOM names its portal at creation time, so it is always offered — the
+   * backend computes allowedPositions the same way. In edit mode the member's
+   * current position stays selectable so an existing account (e.g. added
+   * under a richer plan that the school later downgraded from) is still
+   * editable without appearing broken.
+   */
+  const permittedKeys = React.useMemo(() => {
+    const permitted = new Set(
+      (allowedPositions ?? []).map((row) => row.position).filter(Boolean),
+    );
+    permitted.add("CUSTOM" as StaffPositionKey);
+    if (initial) permitted.add(initial.position as StaffPositionKey);
+    return POSITION_KEYS.filter((k) => permitted.has(k));
+  }, [allowedPositions, initial]);
+  const tierLimited = Boolean(allowedPositions) && permittedKeys.length < POSITION_KEYS.length;
+
+  // Default a fresh create to the first permitted position when the tier no
+  // longer covers the old default (RECEPTIONIST without the reception portal).
+  React.useEffect(() => {
+    if (!open || initial) return;
+    if (permittedKeys.length > 0 && !permittedKeys.includes(position)) {
+      setPosition(permittedKeys[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initial, permittedKeys]);
 
   // Live staff-ID preview for new staff: same server-side sequence, per position.
   React.useEffect(() => {
@@ -202,13 +247,19 @@ export function AddStaffModal({ open, onOpenChange, onSaved, initial }: AddStaff
                 <SelectValue placeholder="Select position" />
               </SelectTrigger>
               <SelectContent>
-                {POSITION_KEYS.map((k) => (
+                {permittedKeys.map((k) => (
                   <SelectItem key={k} value={k}>
                     {POSITION_LABEL[k]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {tierLimited && (
+              <p className="text-xs text-muted-foreground">
+                Positions are limited to the portals your school plan grants.
+                Position assignments outside the plan are refused.
+              </p>
+            )}
           </div>
           {needsCustomTitle && (
             <div className="space-y-2">

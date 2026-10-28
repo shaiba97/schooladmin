@@ -54,3 +54,15 @@ export function notifyTenantLock(body: unknown): TenantLockNotice | null {
 export function currentTenantLock(): TenantLockNotice | null {
   return current;
 }
+
+/**
+ * Clears the recorded lock, e.g. when the user retries with a different
+ * account from the login screen. Reuses the event so any mounted notice
+ * closes in lockstep.
+ */
+export function clearTenantLock(): void {
+  current = null;
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(TENANT_LOCK_EVENT, { detail: null }));
+  }
+}

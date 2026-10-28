@@ -1,5 +1,5 @@
 import { adminApiFetch } from "./client";
-import type { ApiPaginated, ApiReferenceData, ApiStudent, ApiStudentAttendanceRecord, ApiStudentGuardianLink, ApiStudentResult, StudentListQuery } from "./types";
+import type { ApiPaginated, ApiReferenceData, ApiStudent, ApiStudentAttendanceRecord, ApiStudentGuardianLink, ApiStudentResult, ApiTenantResult, StudentListQuery } from "./types";
 
 /**
  * Read-only student surface. Every function below hits the exact GET
@@ -37,4 +37,13 @@ export function listStudentResults(studentId: string) {
 
 export function listStudentAttendanceRecords(studentId: string) {
   return adminApiFetch<ApiStudentAttendanceRecord[]>(`/students/${studentId}/attendance-records`);
+}
+
+export function listTenantResults(query: { examTypeId?: string } = {}) {
+  const params = new URLSearchParams();
+  if (query.examTypeId) params.set("examTypeId", query.examTypeId);
+  const suffix = params.toString();
+  return adminApiFetch<ApiTenantResult[]>(
+    `/students/results/board${suffix ? `?${suffix}` : ""}`,
+  );
 }
