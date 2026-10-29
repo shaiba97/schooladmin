@@ -19,7 +19,14 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PALETTE = ["#0f766e", "#14b8a6", "#10b981", "#059669", "#34d399", "#2dd4bf"];
+const PALETTE = [
+  "var(--dashboard-slice-1)",
+  "var(--dashboard-slice-2)",
+  "var(--dashboard-slice-3)",
+  "var(--dashboard-slice-4)",
+  "var(--dashboard-slice-5)",
+  "var(--dashboard-slice-6)",
+];
 
 export type EnrollmentSlice = { name: string; count: number };
 
@@ -47,12 +54,12 @@ export function EnrollmentDistributionChart({
   return (
     <Card className="gap-0">
       <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
           <span
             aria-hidden
-            className="inline-flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/15 to-emerald-500/10 ring-1 ring-teal-500/20"
+            className="inline-flex size-7 items-center justify-center rounded-lg bg-foreground/[0.04] ring-1 ring-border"
           >
-            <Users size={14} className="text-teal-600 dark:text-teal-400" />
+            <Users size={14} className="text-foreground" />
           </span>
           Enrollment distribution
         </CardTitle>

@@ -11,28 +11,28 @@ const SHORTCUTS = [
     label: "Examination Center",
     caption: "Exams, rooms, and results",
     icon: ClipboardList,
-    accent: "from-emerald-500/15 to-teal-500/10 ring-emerald-500/20 text-emerald-600 dark:text-emerald-400",
+    accent: "bg-foreground/[0.04] ring-1 ring-border text-foreground",
   },
   {
     href: "/school/admin/finance/payments",
     label: "Student Payment Ledgers",
     caption: "Fees, installments, receipts",
     icon: Receipt,
-    accent: "from-teal-500/15 to-emerald-500/10 ring-teal-500/20 text-teal-600 dark:text-teal-400",
+    accent: "bg-foreground/[0.04] ring-1 ring-border text-foreground",
   },
   {
     href: "/school/admin/finance/payouts",
     label: "Teacher Payouts",
     caption: "Payroll runs and payslips",
     icon: Wallet,
-    accent: "from-emerald-500/15 to-cyan-500/10 ring-emerald-500/20 text-emerald-600 dark:text-emerald-400",
+    accent: "bg-foreground/[0.04] ring-1 ring-border text-foreground",
   },
   {
     href: "/school/admin/staff/attendance",
     label: "Staff Attendance",
     caption: "Daily presence tracking",
     icon: CalendarDays,
-    accent: "from-teal-500/15 to-emerald-500/10 ring-teal-500/20 text-teal-600 dark:text-teal-400",
+    accent: "bg-foreground/[0.04] ring-1 ring-border text-foreground",
   },
 ];
 
@@ -54,7 +54,7 @@ export function ShortcutCards() {
                 <Link
                   key={shortcut.href}
                   href={shortcut.href}
-                  className="group flex items-center gap-3 rounded-xl border bg-card p-3 transition-all hover:border-emerald-500/30 hover:shadow-sm focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="group flex items-center gap-3 rounded-xl border bg-card p-3 transition-all hover:border-foreground/20 hover:shadow-sm focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   <span
                     aria-hidden
@@ -69,7 +69,7 @@ export function ShortcutCards() {
                   <ArrowRight
                     size={16}
                     aria-hidden
-                    className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+                    className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
                   />
                 </Link>
               );

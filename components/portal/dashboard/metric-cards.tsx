@@ -15,15 +15,10 @@ type Metric = {
 };
 
 const ACCENTS = {
-  emerald: {
-    chip: "bg-emerald-500/10 ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/25",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    valueClass: "bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-300",
-  },
-  teal: {
-    chip: "bg-teal-500/10 ring-1 ring-teal-500/20 shadow-lg shadow-teal-500/25",
-    icon: "text-teal-600 dark:text-teal-400",
-    valueClass: "bg-gradient-to-r from-teal-500 to-emerald-600 bg-clip-text text-transparent dark:from-teal-300 dark:to-emerald-400",
+  ink: {
+    chip: "bg-foreground/[0.04] ring-1 ring-border shadow-sm",
+    icon: "text-foreground",
+    valueClass: "text-foreground",
   },
 } as const;
 
@@ -47,7 +42,7 @@ export function MetricCards({
       value: students?.value ?? "0",
       caption: students?.caption ?? "Enrolled headcount across tiers",
       icon: GraduationCap,
-      accent: ACCENTS.emerald,
+      accent: ACCENTS.ink,
       badge: { label: "Live roster", tone: "flat", text: "across all tiers" },
     },
     {
@@ -56,7 +51,7 @@ export function MetricCards({
       value: staffOnDuty?.value ?? "0",
       caption: staffOnDuty?.caption ?? "Active teaching and administrative personnel",
       icon: UsersRound,
-      accent: ACCENTS.teal,
+      accent: ACCENTS.ink,
       badge: { label: "On duty", tone: "flat", text: "today" },
     },
     {
@@ -65,7 +60,7 @@ export function MetricCards({
       value: collections?.value ?? "0",
       caption: collections?.caption ?? "Mada, KNET, and bank transfers vs outstanding",
       icon: Banknote,
-      accent: ACCENTS.emerald,
+      accent: ACCENTS.ink,
       badge: collectionBadge(collections?.pct ?? null),
     },
     {
@@ -74,7 +69,7 @@ export function MetricCards({
       value: cashFlow?.value ?? "0",
       caption: cashFlow?.caption ?? "Revenue − teacher payouts − operational expenses",
       icon: Wallet,
-      accent: ACCENTS.teal,
+      accent: ACCENTS.ink,
       badge: flowBadge(cashFlow?.pct ?? null),
     },
   ];
@@ -90,7 +85,7 @@ export function MetricCards({
           >
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
             />
             <div className="flex items-start justify-between gap-2">
               <span
@@ -142,14 +137,14 @@ function flowBadge(pct: number | null): Metric["badge"] {
 
 function ChangeBadge({ badge }: { badge: NonNullable<Metric["badge"]> }) {
   const Icon = badge.tone === "up" ? TrendingUp : badge.tone === "down" ? TrendingDown : null;
-  const variant = badge.tone === "up" ? "success" : badge.tone === "down" ? "destructive" : "info";
   return (
-    <Badge variant={badge.tone === "flat" ? "info" : variant} className="max-w-full truncate">
+    <Badge
+      variant={badge.tone === "flat" ? "info" : badge.tone === "down" ? "destructive" : "outline"}
+      className="max-w-full truncate"
+    >
       {Icon ? <Icon size={12} aria-hidden /> : null}
       <span className="tabular-nums">{badge.label}</span>
-      <span aria-hidden className="sr-only">
-        {badge.text}
-      </span>
+      <span className="sr-only">{badge.text}</span>
     </Badge>
   );
 }

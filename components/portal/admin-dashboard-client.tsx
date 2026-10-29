@@ -243,30 +243,30 @@ export function AdminDashboardClient({
     <div className="space-y-5">
       <section
         aria-labelledby="dashboard-heading"
-        className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-emerald-500/8 via-card to-teal-500/8 p-5 sm:p-6"
+        className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-foreground/[0.03] via-card to-foreground/[0.02] p-5 sm:p-6"
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-emerald-500/10 blur-3xl"
+          className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-foreground/[0.03] blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-20 -left-10 size-56 rounded-full bg-teal-500/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-20 -left-10 size-56 rounded-full bg-foreground/[0.02] blur-3xl"
         />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="gap-1.5 border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-400">
+              <Badge variant="outline" className="gap-1.5">
                 <School size={12} aria-hidden />
                 {stats?.tenant.name ?? "Madar School"}
               </Badge>
-              <Badge variant="outline" className="gap-1.5 border-teal-500/25 bg-teal-500/10 text-teal-700 dark:border-teal-500/25 dark:bg-teal-500/10 dark:text-teal-400">
+              <Badge variant="muted" className="gap-1.5">
                 <Sparkles size={12} aria-hidden />
                 Multi-tenant workspace
               </Badge>
             </div>
             <h1 id="dashboard-heading" className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-              {greetingFor(now)},<span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-300"> Admin</span>
+              {greetingFor(now)},<span className="bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-500 bg-clip-text text-transparent dark:from-white dark:via-neutral-300 dark:to-neutral-500"> Admin</span>
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               {now ? (

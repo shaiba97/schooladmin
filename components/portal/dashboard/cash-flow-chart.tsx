@@ -29,9 +29,9 @@ export type FlowRow = {
 };
 
 const CASH_FLOW_CONFIG = {
-  revenue: { label: "Fee inflows", color: "#10b981" },
+  revenue: { label: "Fee inflows", color: "var(--foreground)" },
   expenses: { label: "Operational outflows", color: "#f59e0b" },
-  payroll: { label: "Teacher payouts", color: "#14b8a6" },
+  payroll: { label: "Teacher payouts", color: "var(--muted-foreground)" },
 } satisfies ChartConfig;
 
 export function CashFlowChart({
@@ -50,12 +50,12 @@ export function CashFlowChart({
   return (
     <Card className="gap-0 lg:col-span-2">
       <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
           <span
             aria-hidden
-            className="inline-flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/10 ring-1 ring-emerald-500/20"
+            className="inline-flex size-7 items-center justify-center rounded-lg bg-foreground/[0.04] ring-1 ring-border"
           >
-            <Wallet size={14} className="text-emerald-600 dark:text-emerald-400" />
+            <Wallet size={14} className="text-foreground" />
           </span>
           Cash flow & financial trends
         </CardTitle>
@@ -73,16 +73,16 @@ export function CashFlowChart({
             <AreaChart data={data} margin={{ left: 4, right: 8, top: 12 }}>
               <defs>
                 <linearGradient id="dashRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.7} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                  <stop offset="0%" stopColor="var(--foreground)" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0.02} />
                 </linearGradient>
                 <linearGradient id="dashExpenses" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.5} />
                   <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.03} />
                 </linearGradient>
                 <linearGradient id="dashPayroll" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.65} />
-                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0.05} />
+                  <stop offset="0%" stopColor="var(--muted-foreground)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--muted-foreground)" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -99,8 +99,8 @@ export function CashFlowChart({
                 }
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Area dataKey="revenue" type="monotone" stroke="#10b981" strokeWidth={2} fill="url(#dashRevenue)" />
-              <Area dataKey="payroll" type="monotone" stroke="#14b8a6" strokeWidth={2} fill="url(#dashPayroll)" />
+              <Area dataKey="revenue" type="monotone" stroke="var(--foreground)" strokeWidth={2} fill="url(#dashRevenue)" />
+              <Area dataKey="payroll" type="monotone" stroke="var(--muted-foreground)" strokeWidth={2} fill="url(#dashPayroll)" />
               <Area dataKey="expenses" type="monotone" stroke="#f59e0b" strokeWidth={2} fill="url(#dashExpenses)" />
             </AreaChart>
           </ChartContainer>

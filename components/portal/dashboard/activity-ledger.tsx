@@ -1,17 +1,17 @@
 "use client";
 
-import { CircleCheck, ReceiptText, Wallet } from "lucide-react";
-import { Badge, type BadgeVariant } from "@/components/ui/badge";
+import { CircleCheck, ReceiptText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FinanceDashboardActivity } from "@/lib/api/finance";
 import { formatMoney } from "@/lib/dashboard-format";
 
-const ACTIVITY_META: Record<string, { label: string; variant: BadgeVariant; icon: typeof Wallet }> = {
-  COLLECTION: { label: "Payment", variant: "success", icon: Wallet },
-  EXPENSE: { label: "Expense", variant: "warning", icon: ReceiptText },
-  PAYROLL: { label: "Payroll", variant: "info", icon: Wallet },
+const ACTIVITY_META: Record<string, { label: string; icon: typeof ReceiptText }> = {
+  COLLECTION: { label: "Payment", icon: ReceiptText },
+  EXPENSE: { label: "Expense", icon: ReceiptText },
+  PAYROLL: { label: "Payroll", icon: ReceiptText },
 };
 
 const DATE_TIME = new Intl.DateTimeFormat("en-GB", {
@@ -81,14 +81,13 @@ export function ActivityLedger({
                 {activity.slice(0, 5).map((entry, index) => {
                   const meta = ACTIVITY_META[entry.type.toUpperCase()] ?? {
                     label: entry.type,
-                    variant: "muted" as BadgeVariant,
-                    icon: Wallet,
+                    icon: ReceiptText,
                   };
                   const Icon = meta.icon;
                   return (
                     <tr key={`${entry.type}-${entry.at ?? index}-${index}`} className="border-b last:border-b-0 hover:bg-muted/40">
                       <td className="px-4 py-2.5">
-                        <Badge variant={meta.variant} className="whitespace-nowrap">
+                        <Badge variant="outline" className="whitespace-nowrap">
                           <Icon size={12} aria-hidden />
                           {meta.label}
                         </Badge>
