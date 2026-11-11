@@ -1,4 +1,4 @@
-const API_URL = process.env.ADMIN_API_URL || "https://schoolbackend-7n8a.onrender.com/api";
+const API_URL = process.env.ADMIN_API_URL || "https://schoolbackend-gilt.vercel.app/api";
 
 export const ADMIN_AUTH_HEADER = "authorization";
 export const ADMIN_TENANT_HEADER = "x-tenant-id";
