@@ -85,7 +85,7 @@ export function useRealtimeEvent(
         return;
       }
 
-      socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://schoolbackend-gilt.vercel.app", {
+      socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://schoolbackend-7n8a.onrender.com", {
         auth: { token: data.ticket },
         withCredentials: true,
         reconnection: true,
